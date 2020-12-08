@@ -1,11 +1,18 @@
 using AcmeLib;
+using AcmeWebsite.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SecurityUtility;
 
 namespace AcmeWebsite.Controllers
 {
+    [Authorize]
     public class AccountController : Controller
     {
+        private AcmeLib.User BankUser => BankService.GetUser(User.Identity.Name);
+        private int UserId => BankUser.Id;
+
         /// <summary>
         /// Landing page for authenticated bank user.  Displays user information and account summary.
         /// </summary>
@@ -13,14 +20,10 @@ namespace AcmeWebsite.Controllers
         public IActionResult Index()
         {
             ViewData["Title"] = @"Account Home";
-            var uid = HttpContext.Session.GetInt32("uid");
-            if (uid.HasValue)
-            {
-				ViewBag.User = BankService.GetUser(uid.Value);
-                var accts = BankService.GetAccounts(uid.Value);
-                return View(accts);
-            }
-            return View();
+    
+				ViewBag.User = BankUser;
+                var accts = BankService.GetAccounts(UserId);
+                return View(accts);            
         }
 
         /// <summary>
@@ -29,20 +32,11 @@ namespace AcmeWebsite.Controllers
         /// <returns></returns>
         public IActionResult Profile()
         {
-            if (HttpContext.Session
-                        .GetInt32("uid").HasValue)
-            {
-                ViewBag.user =
-                    BankService.GetUser(
-                        HttpContext.Session
-                            .GetInt32("uid").Value);
+
+            ViewBag.user = BankUser;
+            
                 return View();
-            }
-            else
-            {
-                ViewBag.Message = "Session Timeout";
-                return View("../Home/Index");
-            }
+          
         }
 
         /// <summary>
@@ -56,23 +50,14 @@ namespace AcmeWebsite.Controllers
         [HttpPost]
         public IActionResult SaveProfile(string firstname, string lastname, string email, string phonenum)
         {
-            if (HttpContext.Session
-                         .GetInt32("uid").HasValue)
-            {
-                var user = BankService.GetUser(HttpContext.Session
-                            .GetInt32("uid").Value);
+           
+                var user = BankUser;
                 user.Firstname = firstname;
                 user.Lastname = lastname;
                 user.Email = email;
                 user.Phone = phonenum;
                 BankService.SaveProfile(user);
                 return Redirect("~/account/Index");
-            }
-            else
-            {
-                ViewBag.Message = "Session Timeout";
-                return View("../Home/Index");
-            }
         }
 
         /// <summary>
@@ -93,20 +78,15 @@ namespace AcmeWebsite.Controllers
         /// <returns></returns>
 		public IActionResult Transfer()
 		{
-			var uid = HttpContext.Session.GetInt32("uid");
-			if (uid.HasValue)
-			{
-				ViewBag.Accts = BankService.GetAccounts(uid.Value);
-				return View();
-			}
-			else
-			{
-				ViewBag.Message = "Session Timeout";
-				return View("../Home/Index");
-			}
+            AccessRefMap<int> map = new AccessRefMap<int>();
+            var accts = BankService.GetAccounts(UserId);
+            var model = new TransferPayModel(accts, map);
+            HttpContext.Session.SetJsonObject("map", map);
+				
+			return View(model);
 
 		}
-
+        
         /// <summary>
         /// Transfers funds from one user account to another
         /// </summary>
@@ -114,9 +94,12 @@ namespace AcmeWebsite.Controllers
         /// <param name="toAcct">The id of the account to credit</param>
         /// <param name="amount">The amount to transfer</param>
         /// <returns></returns>
-		public IActionResult DoTransfer (int fromAcct, int toAcct, float amount)
+		public IActionResult DoTransfer (TransferPayModel model)
 		{
-            BankService.Transfer(fromAcct, toAcct, amount);
+            var map = HttpContext.Session.GetJsonObject<AccessRefMap<int>>("map");
+            BankService.Transfer(map.GetDirectReference(model.FromAccount), 
+                map.GetDirectReference(model.ToAccount), model.Amount);
+            HttpContext.Session.Remove("map");
             return Redirect("~/account/Index");
         }
 
@@ -126,17 +109,8 @@ namespace AcmeWebsite.Controllers
         /// <returns></returns>
 		public IActionResult BillPay()
 		{
-			var uid = HttpContext.Session.GetInt32("uid");
-			if (uid.HasValue)
-			{
-				ViewBag.Accts = BankService.GetAccounts(uid.Value);
+				ViewBag.Accts = BankService.GetAccounts(UserId);
 				return View();
-			}
-			else
-			{
-				ViewBag.Message = "Session Timeout";
-				return View("../Home/Index");
-			}
 		}
 
         /// <summary>

@@ -1,0 +1,51 @@
+﻿@model AcmeWebsite.Models.EncryptModel
+
+@{
+    ViewData["Title"] = "Encryption Tester";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h4>Encryption Tester</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="KeyPassword" class="control-label"></label>
+                <input asp-for="KeyPassword" class="form-control" value="@Model.KeyPassword" />
+                <span asp-validation-for="KeyPassword" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PlainText" class="control-label"></label>
+                <input asp-for="PlainText" class="form-control" value="@Model.PlainText" />
+                <span asp-validation-for="PlainText" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CipherText" class="control-label"></label>
+                <input asp-for="CipherText" class="form-control" value="@Model.CipherText" />
+                <span asp-validation-for="CipherText" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="HashCode" class="control-label"></label>
+                <input asp-for="HashCode" class="form-control" value="@Model.HashCode" />
+                <span asp-validation-for="HashCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Encrypt" class="btn btn-default" asp-action="Encrypt" />
+                <input type="submit" value="Decrypt" class="btn" asp-action="Decrypt" />
+                <input type="submit" value="Hash" class="btn" asp-action="Hash" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

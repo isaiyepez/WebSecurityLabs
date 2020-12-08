@@ -83,15 +83,15 @@ namespace AcmeLib
         /// </summary>
         /// <param name="id">The ID of the user to find</param>
         /// <returns>User or null if no user with the ID exists</returns>
-        public static User GetUser(int id)
+        public static User GetUser(string email)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 var cmd = conn.CreateCommand();
                 cmd.CommandText = "Select id,email,firstname,lastname,password,phone"
-                    + " from Users where id=@userId";
-                cmd.Parameters.AddWithValue("userId", id);
+                    + " from Users where email=@email";
+                cmd.Parameters.AddWithValue("email", email);
                 var rdr = cmd.ExecuteReader();
                 if (rdr.Read())
                 {

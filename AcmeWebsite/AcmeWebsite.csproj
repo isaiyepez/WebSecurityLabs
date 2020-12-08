@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AcmeLib\AcmeLib.csproj" />
+    <ProjectReference Include="..\SecurityUtility\SecurityUtility.csproj" />
   </ItemGroup>
 
 </Project>

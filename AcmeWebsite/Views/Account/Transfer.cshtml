@@ -1,4 +1,5 @@
 ﻿
+@model TransferPayModel  
 @{
     ViewData["Title"] = "Transfer Funds";
 }
@@ -6,35 +7,27 @@
 <h2>Transfer Funds</h2>
 
 <form action="DoTransfer">
-    <div class="row">
+    <div class="form-group">
         From Account:
-        <select name="fromAcct" class="form-control">
-            @foreach (AcmeLib.Account acct in ViewBag.Accts)
-            {
-                <option value="@acct.Id">@acct.AccountName</option>
-            }
-
+        <select asp-items="@Model.Accounts" asp-for="FromAccount" class="form-control">
+            <option>Select</option>
         </select>
 
     </div>
 
-    <div class="row">
+    <div class="form-group">
         To Account:
-        <select name="toAcct" class="form-control">
-            @foreach (AcmeLib.Account acct in ViewBag.Accts)
-            {
-                <option value="@acct.Id">@acct.AccountName</option>
-            }
-
+        <select asp-items="@Model.Accounts" asp-for="ToAccount" class="form-control">
+            <option>Select</option>
         </select>
 
     </div>
 
-    <div class="row">
-        Amount: <input type="text" class="form-control" name="amount" />
+    <div class="form-group">
+        Amount: <input class="form-control" asp-for="Amount" />
 
     </div>
-    <div class="row">
+    <div class="form-group">
         <input type="submit" value="Transfer Funds" />
     </div>
 </form>
